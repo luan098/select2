@@ -25,6 +25,7 @@ define([
   './data/maximumSelectionLength',
 
   './dropdown',
+  './dropdown/selectAll',
   './dropdown/search',
   './dropdown/hidePlaceholder',
   './dropdown/infiniteScroll',
@@ -48,7 +49,7 @@ define([
              SelectData, ArrayData, AjaxData, Tags, Tokenizer,
              MinimumInputLength, MaximumInputLength, MaximumSelectionLength,
 
-             Dropdown, DropdownSearch, HidePlaceholder, InfiniteScroll,
+             Dropdown, DropdownSelectAll, DropdownSearch, HidePlaceholder, InfiniteScroll,
              AttachBody, MinimumResultsForSearch, SelectOnClose, CloseOnSelect,
              DropdownCSS, TagsSearchHighlight,
 
@@ -136,7 +137,9 @@ define([
 
     if (options.dropdownAdapter == null) {
       if (options.multiple) {
-        options.dropdownAdapter = Dropdown;
+        var SelectAllDropdown = Utils.Decorate(Dropdown, DropdownSelectAll);
+
+        options.dropdownAdapter = SelectAllDropdown;
       } else {
         var SearchableDropdown = Utils.Decorate(Dropdown, DropdownSearch);
 
