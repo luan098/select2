@@ -4190,6 +4190,67 @@ S2.define('select2/dropdown',[
   return Dropdown;
 });
 
+S2.define('select2/dropdown/selectAll',["jquery", "../utils"], function ($, Utils) {
+  function SelectAll() {}
+
+  SelectAll.prototype.render = function (decorated) {
+    var $rendered = decorated.call(this);
+
+    var $selectAll = $(
+      '<span class="select2-select-all select2-select-all--dropdown">' +
+        '<button type="button" class="btn btn-block btn-default select2-select-all__button">Selecionar Todos</button>' +
+        "</span>"
+    );
+
+    this.$selectAllContainer = $selectAll;
+    this.$selectAll = $selectAll.find("button");
+
+    $rendered.prepend($selectAll);
+
+    return $rendered;
+  };
+
+  SelectAll.prototype.bind = function (decorated, container, $container) {
+    var self = this;
+
+    var resultsId = container.id + "-results";
+
+    decorated.call(this, container, $container);
+
+    this.$selectAll.on("click", function (evt) {
+      self.handleClick(evt);
+    });
+  };
+
+  SelectAll.prototype.handleClick = function (evt, b, c) {
+    elements = this.$dropdownContainer.find(".select2-results__option");
+
+    elements.each((i, e) => {
+      var data = Utils.GetData(e, "data");
+
+      if (
+        (data.element != null && data.element.selected) ||
+        (data.element == null && data.selected)
+      ) {
+        this.trigger("unselect", {
+          data: data,
+        });
+
+      } else {
+        this.trigger("select", {
+          data: data,
+        });
+      }
+    });
+  };
+
+  SelectAll.prototype.showSelectAll = function (_, params) {
+    return true;
+  };
+
+  return SelectAll;
+});
+
 S2.define('select2/dropdown/search',[
   'jquery'
 ], function ($) {
@@ -4970,6 +5031,7 @@ S2.define('select2/defaults',[
   './data/maximumSelectionLength',
 
   './dropdown',
+  './dropdown/selectAll',
   './dropdown/search',
   './dropdown/hidePlaceholder',
   './dropdown/infiniteScroll',
@@ -4993,7 +5055,7 @@ S2.define('select2/defaults',[
              SelectData, ArrayData, AjaxData, Tags, Tokenizer,
              MinimumInputLength, MaximumInputLength, MaximumSelectionLength,
 
-             Dropdown, DropdownSearch, HidePlaceholder, InfiniteScroll,
+             Dropdown, DropdownSelectAll, DropdownSearch, HidePlaceholder, InfiniteScroll,
              AttachBody, MinimumResultsForSearch, SelectOnClose, CloseOnSelect,
              DropdownCSS, TagsSearchHighlight,
 
@@ -5081,7 +5143,9 @@ S2.define('select2/defaults',[
 
     if (options.dropdownAdapter == null) {
       if (options.multiple) {
-        options.dropdownAdapter = Dropdown;
+        var SelectAllDropdown = Utils.Decorate(Dropdown, DropdownSelectAll);
+
+        options.dropdownAdapter = SelectAllDropdown;
       } else {
         var SearchableDropdown = Utils.Decorate(Dropdown, DropdownSearch);
 
